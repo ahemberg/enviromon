@@ -1,3 +1,5 @@
+#include "pins.h"
+
 #include <Arduino.h>
 #include <Wire.h>
 #include <DS3231.h>
@@ -9,12 +11,14 @@ Cli cli = Cli(Clock);
 
 void setup()
 {
-  // put your setup code here, to run once:
   Serial.begin(9600);
   Wire.begin();
+  pinMode(CLI_ENABLE, INPUT_PULLUP);
 }
 
 void loop()
 {
-  cli.mainL();
+  if (digitalRead(CLI_ENABLE) == LOW) {
+    cli.mainL();
+  }
 }
