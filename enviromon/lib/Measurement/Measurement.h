@@ -3,6 +3,17 @@
 #include <Arduino.h>
 #include "DateHolder.h"
 
+//TODO These defines somewhere nice
+#define MIN_TEMP -55.0
+#define MAX_TEMP 125.0
+#define MIN_HUMIDITY 0.0
+#define MAX_HUMIDITY 100.0
+#define MIN_BATT_V 2.5
+#define MAX_BATT_V 4.5
+#define MIN_SP_V 0.0
+#define MAX_SP_V 12.0
+
+
 /*
     Abstraction of measurement saved in memory
 */

@@ -18,9 +18,7 @@ DallasTemperature tempSensors(&oneWire);
 DHT dht(DHTPIN, DHTTYPE);
 
 float temperature;
-float internalTemperature; //Temperature from RTC. Not to be saved but maybe used for battery heater?
 float relHumidity;
-float dhtTemp;
 uint8_t byteArray[8];
 
 float getTemperature()

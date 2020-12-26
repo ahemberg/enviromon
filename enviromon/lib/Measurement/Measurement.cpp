@@ -26,10 +26,10 @@ void Measurement::getAsByteArray(uint8_t (&byteArray)[8])
     byteArray[1] = this->date.getMonth();
     byteArray[2] = this->date.getDay();
     byteArray[3] = this->date.getHour();
-    byteArray[4] = encodeValue(this->temperature, -55.0, 125.0); //TODO: These are sensor min/max. Will never encounter extremes. Narrower band gives higher res!
-    byteArray[5] = encodeValue(this->relativeHumidity, 0.0, 100.0);
-    byteArray[6] = encodeValue(this->batteryVoltage, 2.5, 4.5);
-    byteArray[7] = encodeValue(this->solarPanelVoltage, 0.0, 10.0);
+    byteArray[4] = encodeValue(this->temperature, MIN_TEMP, MAX_TEMP);
+    byteArray[5] = encodeValue(this->relativeHumidity, MIN_HUMIDITY, MAX_HUMIDITY);
+    byteArray[6] = encodeValue(this->batteryVoltage, MIN_BATT_V, MAX_BATT_V);
+    byteArray[7] = encodeValue(this->solarPanelVoltage, MIN_SP_V, MAX_SP_V);
 }
 
 Measurement Measurement::fromByteArray(uint8_t (&byteArray)[8])
@@ -38,10 +38,10 @@ Measurement Measurement::fromByteArray(uint8_t (&byteArray)[8])
     DateHolder date(byteArray[0], byteArray[1], byteArray[2], byteArray[3]);
 
     Measurement measurement(date,
-                            decodeValue(byteArray[4], -55.0, 125.0),
-                            decodeValue(byteArray[5], 0.0, 100),
-                            decodeValue(byteArray[6], 2.5, 4.5),
-                            decodeValue(byteArray[7], 0.0, 10.0));
+                            decodeValue(byteArray[4], MIN_TEMP, MAX_TEMP),
+                            decodeValue(byteArray[5], MIN_HUMIDITY, MAX_HUMIDITY),
+                            decodeValue(byteArray[6], MIN_BATT_V, MAX_BATT_V),
+                            decodeValue(byteArray[7], MIN_SP_V, MAX_SP_V));
 
     return measurement;
 }
