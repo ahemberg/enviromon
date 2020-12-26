@@ -7,3 +7,12 @@
 [submodule "enviromon/lib/DallasTemperature"]
 	path = enviromon/lib/DallasTemperature
 	url = https://github.com/milesburton/Arduino-Temperature-Control-Library.git
+[submodule "enviromon/lib/DHTNew"]
+	path = enviromon/lib/DHTNew
+	url = https://github.com/RobTillaart/DHTNew.git
+[submodule "enviromon/lib/DHT"]
+	path = enviromon/lib/DHT
+	url = https://github.com/adafruit/DHT-sensor-library.git
+[submodule "enviromon/lib/AdafruitSensor"]
+	path = enviromon/lib/AdafruitSensor
+	url = https://github.com/adafruit/Adafruit_Sensor.git
