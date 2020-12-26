@@ -21,6 +21,7 @@ float temperature;
 float internalTemperature; //Temperature from RTC. Not to be saved but maybe used for battery heater?
 float relHumidity;
 float dhtTemp;
+uint8_t byteArray[8];
 
 float getTemperature()
 {
@@ -65,6 +66,10 @@ void loop()
   else
   {
     Measurement measurement = doMeasurement();
+    measurement.getAsByteArray(byteArray);
+    Serial.print("      Meas: ");
     Serial.println(measurement.toString());
+    Serial.print("From Bytes: ");
+    Serial.println(Measurement::fromByteArray(byteArray).toString());
   }
 }

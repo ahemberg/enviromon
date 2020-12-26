@@ -23,6 +23,6 @@ public:
                 const float batteryVoltage,
                 const float solarpanelVoltage);
     void getAsByteArray(uint8_t (&byteArray)[8]);
-    Measurement fromByteArray(uint8_t &measArray);
+    static Measurement fromByteArray(uint8_t (&byteArray)[8]);
     const String toString();
 };

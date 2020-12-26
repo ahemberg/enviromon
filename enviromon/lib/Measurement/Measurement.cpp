@@ -2,7 +2,6 @@
 
 uint8_t encodeValue(float value, float minValue, float maxValue)
 {
-
     if (value <= minValue)
     {
         return (uint8_t)0;
@@ -18,7 +17,7 @@ uint8_t encodeValue(float value, float minValue, float maxValue)
 
 float decodeValue(uint8_t encoded, float minValue, float maxValue)
 {
-    float voltage = minValue + (encoded * (maxValue - minValue)) / 255.0;
+    return minValue + (encoded * (maxValue - minValue)) / 255.0;
 }
 
 void Measurement::getAsByteArray(uint8_t (&byteArray)[8])
@@ -31,6 +30,20 @@ void Measurement::getAsByteArray(uint8_t (&byteArray)[8])
     byteArray[5] = encodeValue(this->relativeHumidity, 0.0, 100.0);
     byteArray[6] = encodeValue(this->batteryVoltage, 2.5, 4.5);
     byteArray[7] = encodeValue(this->solarPanelVoltage, 0.0, 10.0);
+}
+
+Measurement Measurement::fromByteArray(uint8_t (&byteArray)[8])
+{
+
+    DateHolder date(byteArray[0], byteArray[1], byteArray[2], byteArray[3]);
+
+    Measurement measurement(date,
+                            decodeValue(byteArray[4], -55.0, 125.0),
+                            decodeValue(byteArray[5], 0.0, 100),
+                            decodeValue(byteArray[6], 2.5, 4.5),
+                            decodeValue(byteArray[7], 0.0, 10.0));
+
+    return measurement;
 }
 
 Measurement::Measurement(const DateHolder date,
