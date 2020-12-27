@@ -2,16 +2,7 @@
 
 #include <Arduino.h>
 #include "DateHolder.h"
-
-//TODO These defines somewhere nice
-#define MIN_TEMP -55.0
-#define MAX_TEMP 125.0
-#define MIN_HUMIDITY 0.0
-#define MAX_HUMIDITY 100.0
-#define MIN_BATT_V 2.5
-#define MAX_BATT_V 4.5
-#define MIN_SP_V 0.0
-#define MAX_SP_V 12.0
+#include "constants.h"
 
 
 /*
@@ -20,7 +11,7 @@
 class Measurement
 {
 private:
-    uint8_t byteArray[7];
+    uint8_t byteArray[MEM_SIZE];
     DateHolder date;
     const float temperature;
     const float relativeHumidity;
@@ -33,7 +24,7 @@ public:
                 const float relativeHumidity,
                 const float batteryVoltage,
                 const float solarpanelVoltage);
-    void getAsByteArray(uint8_t (&byteArray)[8]);
-    static Measurement fromByteArray(uint8_t (&byteArray)[8]);
+    void getAsByteArray(uint8_t (&byteArray)[MEM_SIZE]);
+    static Measurement fromByteArray(uint8_t (&byteArray)[MEM_SIZE]);
     const String toString();
 };

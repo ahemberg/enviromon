@@ -1,10 +1,10 @@
 #include "cli.h"
 
-Cli::Cli(DS3231 c) : Clock(c) {}
+Cli::Cli(DS3231 c, Storage s) : Clock(c), storage(s) {}
 
 void Cli::mem()
 {
-  Serial.println("Memory interface. DUMP | GETLATEST | ERASE | EXIT ");
+  Serial.println("Memory interface: GETADDR | DUMP | LATEST | ERASE | EXIT ");
 
   while (true)
   {
@@ -14,22 +14,55 @@ void Cli::mem()
     }
     String subCommand = Serial.readStringUntil('\n');
     subCommand.trim();
-    if (subCommand.equalsIgnoreCase("DUMP"))
+    if (subCommand.equalsIgnoreCase("GETADDR"))
     {
-      Serial.println("Will print all values over console...");
+      Serial.print("\nGETADDR: ");
+      Serial.print("Memory points to ");
+      Serial.println(storage.getNextAddress());
     }
-    if (subCommand.equalsIgnoreCase("GETLATEST"))
+    else if (subCommand.equalsIgnoreCase("DUMP"))
     {
-      Serial.println("Will get latest...");
+      //TODO don't print if erased?
+      Serial.println("Measurements:");
+      for (uint16_t addr = 2; addr < storage.getNextAddress(); addr += MEM_SIZE)
+      {
+        Serial.println(storage.getMeasurement(addr).toString());
+      }
     }
-    if (subCommand.equalsIgnoreCase("ERASE"))
+    else if (subCommand.equalsIgnoreCase("LATEST"))
     {
-      Serial.println("Will erase all. Should ask for confirmation!");
+      //TODO don't print if erased?
+      Serial.println("Latest measurement: ");
+      Serial.println(storage.getLatestMeasurement().toString());
     }
-    if (subCommand.equalsIgnoreCase("EXIT"))
+    else if (subCommand.equalsIgnoreCase("ERASE"))
+    {
+      Serial.print("Will erase all! Continue? [y/N] ");
+      while (!Serial.available())
+      {
+      }
+      String confirm = Serial.readStringUntil('\n');
+      confirm.trim();
+      if (confirm.equalsIgnoreCase("Y"))
+      {
+        Serial.println("Yes");
+        storage.eraseMem();
+        Serial.println("Memory Erased!");
+      }
+      else
+      {
+        Serial.println("No");
+        Serial.println("Aborting!");
+      }
+    }
+    else if (subCommand.equalsIgnoreCase("EXIT"))
     {
       Serial.println("Bye..");
       break;
+    }
+    else
+    {
+      Serial.println("invalid command! GETADDR | DUMP | LATEST | ERASE | EXIT");
     }
   }
 }

@@ -10,16 +10,16 @@
 #include <Measurement.h>
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
+#include <EEPROM.h>
+#include <Storage.h>
 
 DS3231 Clock;
-Cli cli = Cli(Clock);
+Storage storage;
+Cli cli = Cli(Clock, storage);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature tempSensors(&oneWire);
 DHT dht(DHTPIN, DHTTYPE);
 
-float temperature;
-float relHumidity;
-uint8_t byteArray[8];
 
 float getTemperature()
 {
@@ -27,17 +27,18 @@ float getTemperature()
   return tempSensors.getTempCByIndex(0);
 }
 
-Measurement doMeasurement() {
-    bool timeFlag = false;
-    DateHolder measurementDate = DateHolder(
-        Clock.getYear(),
-        Clock.getMonth(timeFlag),
-        Clock.getDate(),
-        Clock.getHour(timeFlag, timeFlag),
-        Clock.getMinute(),
-        Clock.getSecond());
-    return Measurement(measurementDate, getTemperature(), dht.readHumidity(), 0, 0);
-  }
+Measurement doMeasurement()
+{
+  bool timeFlag = false;
+  DateHolder measurementDate = DateHolder(
+      Clock.getYear(),
+      Clock.getMonth(timeFlag),
+      Clock.getDate(),
+      Clock.getHour(timeFlag, timeFlag),
+      Clock.getMinute(),
+      Clock.getSecond());
+  return Measurement(measurementDate, getTemperature(), dht.readHumidity() - 10, 0, 0);
+}
 
 void setup()
 {
@@ -52,11 +53,7 @@ void loop()
 {
 
   //TODO Trigger measurement on alarm.
-  //Calculate memory map from a measurement
-  //Save to eeprom 
-  //Create Measurement object from memory
-  //Need a memory management class 
-
+  //CLI to dump memory
   if (digitalRead(CLI_ENABLE) == LOW)
   {
     cli.mainL();
@@ -64,10 +61,15 @@ void loop()
   else
   {
     Measurement measurement = doMeasurement();
-    measurement.getAsByteArray(byteArray);
-    Serial.print("      Meas: ");
+    storage.eraseMem();
+    storage.readNextAddress();
+    Serial.println(storage.getNextAddress());
+    storage.writeMeasurement(measurement);
     Serial.println(measurement.toString());
-    Serial.print("From Bytes: ");
-    Serial.println(Measurement::fromByteArray(byteArray).toString());
+    Serial.println(storage.getMeasurement(2).toString());
+    Serial.println(storage.getNextAddress());
+    while (1)
+    {
+    }
   }
 }

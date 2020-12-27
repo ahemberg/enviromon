@@ -20,28 +20,29 @@ float decodeValue(uint8_t encoded, float minValue, float maxValue)
     return minValue + (encoded * (maxValue - minValue)) / 255.0;
 }
 
-void Measurement::getAsByteArray(uint8_t (&byteArray)[8])
+void Measurement::getAsByteArray(uint8_t (&byteArray)[MEM_SIZE])
 {
     byteArray[0] = this->date.getYear();
     byteArray[1] = this->date.getMonth();
     byteArray[2] = this->date.getDay();
     byteArray[3] = this->date.getHour();
-    byteArray[4] = encodeValue(this->temperature, MIN_TEMP, MAX_TEMP);
-    byteArray[5] = encodeValue(this->relativeHumidity, MIN_HUMIDITY, MAX_HUMIDITY);
-    byteArray[6] = encodeValue(this->batteryVoltage, MIN_BATT_V, MAX_BATT_V);
-    byteArray[7] = encodeValue(this->solarPanelVoltage, MIN_SP_V, MAX_SP_V);
+    byteArray[4] = this->date.getMinute();
+    byteArray[5] = encodeValue(this->temperature, MIN_TEMP, MAX_TEMP);
+    byteArray[6] = encodeValue(this->relativeHumidity, MIN_HUMIDITY, MAX_HUMIDITY);
+    byteArray[7] = encodeValue(this->batteryVoltage, MIN_BATT_V, MAX_BATT_V);
+    byteArray[8] = encodeValue(this->solarPanelVoltage, MIN_SP_V, MAX_SP_V);
 }
 
-Measurement Measurement::fromByteArray(uint8_t (&byteArray)[8])
+Measurement Measurement::fromByteArray(uint8_t (&byteArray)[MEM_SIZE])
 {
 
-    DateHolder date(byteArray[0], byteArray[1], byteArray[2], byteArray[3]);
+    DateHolder date(byteArray[0], byteArray[1], byteArray[2], byteArray[3], byteArray[4]);
 
     Measurement measurement(date,
-                            decodeValue(byteArray[4], MIN_TEMP, MAX_TEMP),
-                            decodeValue(byteArray[5], MIN_HUMIDITY, MAX_HUMIDITY),
-                            decodeValue(byteArray[6], MIN_BATT_V, MAX_BATT_V),
-                            decodeValue(byteArray[7], MIN_SP_V, MAX_SP_V));
+                            decodeValue(byteArray[5], MIN_TEMP, MAX_TEMP),
+                            decodeValue(byteArray[6], MIN_HUMIDITY, MAX_HUMIDITY),
+                            decodeValue(byteArray[7], MIN_BATT_V, MAX_BATT_V),
+                            decodeValue(byteArray[8], MIN_SP_V, MAX_SP_V));
 
     return measurement;
 }
