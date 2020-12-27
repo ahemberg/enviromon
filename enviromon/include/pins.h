@@ -4,5 +4,8 @@
 #define ONE_WIRE_BUS 6
 
 // HUMIDITY SENSOR
-#define DHTPIN 3
+#define DHTPIN 5
 #define DHTTYPE DHT11
+
+//INTERRUPTS
+#define ALARM_PIN 3
