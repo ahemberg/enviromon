@@ -1,6 +1,3 @@
-[submodule "enviromon/lib/DS3231"]
-	path = enviromon/lib/DS3231
-	url = https://github.com/NorthernWidget/DS3231
 [submodule "enviromon/lib/OneWire"]
 	path = enviromon/lib/OneWire
 	url = https://github.com/PaulStoffregen/OneWire.git
