@@ -6,7 +6,6 @@
 #include <DallasTemperature.h>
 #include <RTClib.h>
 #include <cli.h>
-#include <DateHolder.h>
 #include <Measurement.h>
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
@@ -22,16 +21,20 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature tempSensors(&oneWire);
 DHT dht(DHTPIN, DHTTYPE);
 
-float getTemperature()
+float measureVoltage(int pin, float r1 = 1, float r2 = 1)
 {
-  tempSensors.requestTemperatures();
-  return tempSensors.getTempCByIndex(0);
+  float rawVoltage = ((float)analogRead(pin) / 1024.0) * BUS_VOLTAGE;
+  return (rawVoltage * (r1 + r2)) / r2;
 }
 
 Measurement doMeasurement()
 {
   tempSensors.requestTemperatures();
-  return Measurement(rtc.now(), tempSensors.getTempCByIndex(0), dht.readHumidity() - 10, 0, 0);
+  return Measurement(rtc.now(),
+                     tempSensors.getTempCByIndex(0),
+                     dht.readHumidity() - 10,
+                     measureVoltage(BATT_V_PIN, BATT_R1, BATT_R2),
+                     measureVoltage(SOLAR_V_PIN, SOLAR_R1, SOLAR_R2));
 }
 
 void alarm_ISR()
@@ -79,18 +82,26 @@ void enterSleep()
 
 void setup()
 {
+  //Serial and onewire
   Serial.begin(115200);
   Wire.begin();
+
+  //Sensors
   tempSensors.begin();
   dht.begin();
+
+  //Input Pins
   pinMode(CLI_ENABLE, INPUT_PULLUP);
   pinMode(ALARM_PIN, INPUT_PULLUP);
 
+  //ANALOG PINS
+  pinMode(BATT_V_PIN, INPUT);
+
+  //RTC MODULE SETUP
   rtc.disableAlarm(DS3231_ALARM1);
   rtc.disableAlarm(DS3231_ALARM2);
   rtc.clearAlarm(DS3231_ALARM1);
   rtc.clearAlarm(DS3231_ALARM2);
-
   rtc.writeSqwPinMode(DS3231_OFF);
 }
 

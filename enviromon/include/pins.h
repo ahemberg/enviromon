@@ -9,3 +9,7 @@
 
 //INTERRUPTS
 #define ALARM_PIN 3
+
+//ANALOG READ PINS
+#define BATT_V_PIN A0
+#define SOLAR_V_PIN A1

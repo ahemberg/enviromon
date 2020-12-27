@@ -1,4 +1,5 @@
 /* Definition of constant values */
+#define BUS_VOLTAGE 3.3
 
 //Sensor Ranges
 #define MIN_TEMP -30.0
@@ -14,3 +15,9 @@
 
 //Size of a saved measurement in bytes
 #define MEM_SIZE 8
+
+//RESISTOR DIVIDERS
+#define BATT_R1 330000
+#define BATT_R2 330000
+#define SOLAR_R1 100000
+#define SOLAR_R2 33000
