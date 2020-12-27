@@ -13,9 +13,10 @@
 #include <EEPROM.h>
 #include <Storage.h>
 #include <avr/sleep.h>
+#include <avr/power.h>
 
 RTC_DS3231 rtc;
-Storage storage; //This should probablt by volatile...
+Storage storage;
 Cli cli = Cli(rtc, storage);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature tempSensors(&oneWire);
@@ -29,37 +30,52 @@ float getTemperature()
 
 Measurement doMeasurement()
 {
-  return Measurement(rtc.now(), getTemperature(), dht.readHumidity() - 10, 0, 0);
+  tempSensors.requestTemperatures();
+  return Measurement(rtc.now(), tempSensors.getTempCByIndex(0), dht.readHumidity() - 10, 0, 0);
 }
 
-void alarm_ISR() {
-  // This runs when SQW pin is low. It will wake up the µController
-  
-  sleep_disable(); // Disable sleep mode
+void alarm_ISR()
+{
+  sleep_disable();                                   // Disable sleep mode
   detachInterrupt(digitalPinToInterrupt(ALARM_PIN)); // Detach the interrupt to stop it firing
 }
 
-void enterSleep(){
-  sleep_enable();                       // Enabling sleep mode
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);  // Setting the sleep mode, in this case full sleep
-  
-  noInterrupts();                       // Disable interrupts
+void enterSleep()
+{
+  sleep_enable(); // Enabling sleep mode
+
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // Setting the sleep mode, in this case full sleep
+
+  noInterrupts(); // Disable interrupts
   attachInterrupt(digitalPinToInterrupt(ALARM_PIN), alarm_ISR, LOW);
-  
-  Serial.println("Going to sleep!");    // Print message to serial monitor
-  Serial.flush();                       // Ensure all characters are sent to the serial monitor
-  
-  interrupts();                         // Allow interrupts again
-  sleep_cpu();                          // Enter sleep mode
+
+  Serial.println("Going to sleep!"); // Print message to serial monitor
+  Serial.flush();                    // Ensure all characters are sent to the serial monitor
+
+  power_adc_disable();
+  power_spi_disable();
+  power_twi_disable();
+  power_timer0_disable();
+  power_timer1_disable();
+  power_usart0_disable();
+
+  interrupts(); // Allow interrupts again
+  sleep_cpu();  // Enter sleep mode
 
   /* The program will continue from here when it wakes */
-  
+  power_adc_enable();
+  power_spi_enable();
+  power_twi_enable();
+  power_timer0_enable();
+  power_timer1_enable();
+  power_usart0_enable();
+
   // Disable and clear alarm
   rtc.disableAlarm(1);
   rtc.clearAlarm(1);
-  
-  Serial.println("I'm back!");          // Print message to show we're back
- }
+
+  Serial.println("I'm back!"); // Print message to show we're back
+}
 
 void setup()
 {
@@ -80,11 +96,7 @@ void setup()
 
 void loop()
 {
-
-  //TODO Trigger measurement on alarm.
-  //Add reading of voltages
-  //Then done and ready to test!
-  //Have Switch to CLI_ENABLE set interrupt low aswell. This should wake the
+  //TRIGGERED BY
   if (digitalRead(CLI_ENABLE) == LOW)
   {
     detachInterrupt(digitalPinToInterrupt(ALARM_PIN));
@@ -96,22 +108,7 @@ void loop()
     //Do measurement and save
     Measurement measurement = doMeasurement();
     storage.writeMeasurement(measurement);
-
-    // Get current time and set alarm to a time to wake
-    //DateTime now = rtc.now();  // Get current time
-    //rtc.setAlarm1(now + TimeSpan(0, 0, 0, 10), DS3231_A1_Second); // In 10 seconds
-    rtc.setAlarm1(DateTime(2020, 6, 25, 0, 0, 0), DS3231_A1_Second); // Or can be set explicity
-    
-    enterSleep();  // Go to slee
-    
-    //ENTER SLEEP MODE
-    //Serial.println(storage.getNextAddress());
-    //Serial.println(triggered);
-    //Measurement measurement = doMeasurement();
-    //storage.writeMeasurement(measurement);
-    //delay(100);
-    //attachInterrupt(digitalPinToInterrupt(ALARM_PIN), alarm_ISR, FALLING);
-
-    //Sleep...
+    rtc.setAlarm1(DateTime(2020, 6, 25, 0, 0, 0), DS3231_A1_Minute); // Set Alarm at even hour
+    enterSleep();                                                    // Go to sleep
   }
 }
