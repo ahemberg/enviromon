@@ -5,6 +5,7 @@ void Storage::eraseMem()
 {
     EEPROM.write(0, 0);
     EEPROM.write(1, 2);
+    readNextAddress();
 }
 //TODO: Handle overflow
 Measurement Storage::getMeasurement(uint16_t address)
@@ -57,7 +58,7 @@ void Storage::updateAddress(uint16_t newAddress)
 {
     EEPROM.write(0, (uint8_t)(newAddress >> 8));
     EEPROM.write(1, (uint8_t)(newAddress & 0xFF));
-    this->previousAddress = nextAddress;
+    this->previousAddress = this->nextAddress;
     this->nextAddress = newAddress;
 }
 

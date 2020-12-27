@@ -42,7 +42,7 @@ Measurement doMeasurement()
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Wire.begin();
   tempSensors.begin();
   dht.begin();
@@ -61,15 +61,8 @@ void loop()
   else
   {
     Measurement measurement = doMeasurement();
-    storage.eraseMem();
-    storage.readNextAddress();
-    Serial.println(storage.getNextAddress());
     storage.writeMeasurement(measurement);
-    Serial.println(measurement.toString());
-    Serial.println(storage.getMeasurement(2).toString());
     Serial.println(storage.getNextAddress());
-    while (1)
-    {
-    }
+    delay(1000);
   }
 }
