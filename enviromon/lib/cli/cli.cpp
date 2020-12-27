@@ -1,6 +1,6 @@
 #include "cli.h"
 
-Cli::Cli(DS3231 &c, Storage &s) : Clock(c), storage(s) {}
+Cli::Cli(RTC_DS3231 &r, Storage &s) : rtc(r), storage(s) {}
 
 void Cli::mem()
 {
@@ -91,61 +91,56 @@ void Cli::time()
     if (subCommand.equalsIgnoreCase("SET"))
     {
       Serial.println("SET ---- ");
-      Serial.print("YEAR (only decade!): ");
+      Serial.print("YEAR: ");
       while (!Serial.available())
       {
       }
-      byte year = Serial.readStringUntil('\n').toInt(); //Error prone but maybe ok..
+      uint16_t year = Serial.readStringUntil('\n').toInt();
       Serial.println(year, DEC);
-      Clock.setYear(year);
-
       Serial.print("MONTH: ");
       while (!Serial.available())
       {
       }
-      byte month = Serial.readStringUntil('\n').toInt(); //Error prone but maybe ok..
+      uint8_t month = Serial.readStringUntil('\n').toInt();
       Serial.println(month, DEC);
-      Clock.setMonth(month);
 
       Serial.print("DAY: ");
       while (!Serial.available())
       {
       }
-      byte day = Serial.readStringUntil('\n').toInt(); //Error prone but maybe ok..
+      uint8_t day = Serial.readStringUntil('\n').toInt();
       Serial.println(day, DEC);
-      Clock.setDate(day);
 
       Serial.print("HOUR: ");
       while (!Serial.available())
       {
       }
-      byte hour = Serial.readStringUntil('\n').toInt(); //Error prone but maybe ok..
+      uint8_t hour = Serial.readStringUntil('\n').toInt();
       Serial.println(hour, DEC);
-      Clock.setHour(hour);
 
       Serial.print("MINUTE: ");
       while (!Serial.available())
       {
       }
-      byte minute = Serial.readStringUntil('\n').toInt(); //Error prone but maybe ok..
-      Clock.setMinute(minute);
+      uint8_t minute = Serial.readStringUntil('\n').toInt();
       Serial.println(minute, DEC);
-      Clock.setSecond(0);
+      DateTime dt(year, month, day, hour, minute);
+      rtc.adjust(dt);
     }
     else if (subCommand.equalsIgnoreCase("GET"))
     {
-      Serial.print(20, DEC);
-      Serial.print(Clock.getYear(), DEC);
+      DateTime now = rtc.now();
+      Serial.print(now.year(), DEC);
       Serial.print("-");
-      Serial.print(Clock.getMonth(century), DEC);
+      Serial.print(now.month(), DEC);
       Serial.print("-");
-      Serial.print(Clock.getDate(), DEC);
+      Serial.print(now.day(), DEC);
       Serial.print(" ");
-      Serial.print(Clock.getHour(h12Flag, pmFlag), DEC);
+      Serial.print(now.hour(), DEC);
       Serial.print(":");
-      Serial.print(Clock.getMinute(), DEC);
+      Serial.print(now.minute(), DEC);
       Serial.print(":");
-      Serial.println(Clock.getSecond(), DEC);
+      Serial.println(now.second(), DEC);
     }
     else if (subCommand.equalsIgnoreCase("EXIT"))
     {
@@ -161,7 +156,6 @@ void Cli::time()
 
 void Cli::mainL()
 {
-  //TODO break this out into a cli object that will be called IF a pin is high. Then we add a toggle switch for CLI mode..
   if (Serial.available() > 0)
   {
     String baseCommand = Serial.readStringUntil('\n');

@@ -1,13 +1,13 @@
 #pragma once
 #include <Arduino.h>
-#include <DS3231.h>
+#include <RTClib.h>
 #include <Storage.h>
 #include "constants.h"
 
 class Cli
 {
 private:
-  DS3231 &Clock;
+  RTC_DS3231 &rtc;
   Storage &storage;
   bool century;
   bool h12Flag;
@@ -16,6 +16,6 @@ private:
   void mem();
 
 public:
-  Cli(DS3231 &Clock, Storage &storage);
+  Cli(RTC_DS3231 &rtc, Storage &storage);
   void mainL();
 };

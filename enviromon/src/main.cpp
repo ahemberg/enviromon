@@ -4,7 +4,7 @@
 #include <Wire.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <DS3231.h>
+#include <RTClib.h>
 #include <cli.h>
 #include <DateHolder.h>
 #include <Measurement.h>
@@ -13,13 +13,12 @@
 #include <EEPROM.h>
 #include <Storage.h>
 
-DS3231 Clock;
+RTC_DS3231 rtc;
 Storage storage;
-Cli cli = Cli(Clock, storage);
+Cli cli = Cli(rtc, storage);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature tempSensors(&oneWire);
 DHT dht(DHTPIN, DHTTYPE);
-
 
 float getTemperature()
 {
@@ -29,15 +28,7 @@ float getTemperature()
 
 Measurement doMeasurement()
 {
-  bool timeFlag = false;
-  DateHolder measurementDate = DateHolder(
-      Clock.getYear(),
-      Clock.getMonth(timeFlag),
-      Clock.getDate(),
-      Clock.getHour(timeFlag, timeFlag),
-      Clock.getMinute(),
-      Clock.getSecond());
-  return Measurement(measurementDate, getTemperature(), dht.readHumidity() - 10, 0, 0);
+  return Measurement(rtc.now(), getTemperature(), dht.readHumidity() - 10, 0, 0);
 }
 
 void setup()
@@ -53,7 +44,8 @@ void loop()
 {
 
   //TODO Trigger measurement on alarm.
-  //CLI to dump memory
+  //Add reading of voltages
+  //Then done and ready to test!
   if (digitalRead(CLI_ENABLE) == LOW)
   {
     cli.mainL();

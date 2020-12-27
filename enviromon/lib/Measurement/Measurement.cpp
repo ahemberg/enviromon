@@ -22,32 +22,36 @@ float decodeValue(uint8_t encoded, float minValue, float maxValue)
 
 void Measurement::getAsByteArray(uint8_t (&byteArray)[MEM_SIZE])
 {
-    byteArray[0] = this->date.getYear();
-    byteArray[1] = this->date.getMonth();
-    byteArray[2] = this->date.getDay();
-    byteArray[3] = this->date.getHour();
-    byteArray[4] = this->date.getMinute();
-    byteArray[5] = encodeValue(this->temperature, MIN_TEMP, MAX_TEMP);
-    byteArray[6] = encodeValue(this->relativeHumidity, MIN_HUMIDITY, MAX_HUMIDITY);
-    byteArray[7] = encodeValue(this->batteryVoltage, MIN_BATT_V, MAX_BATT_V);
-    byteArray[8] = encodeValue(this->solarPanelVoltage, MIN_SP_V, MAX_SP_V);
+
+    uint32_t unixTime = this->date.unixtime();
+
+    byteArray[0] = (uint8_t)(unixTime >> 24);
+    byteArray[1] = (uint8_t)(unixTime >> 16) & 0xFF;
+    byteArray[2] = (uint8_t)(unixTime >> 8) & 0xFF;
+    byteArray[3] = (uint8_t)(unixTime & 0xFF);
+    byteArray[4] = encodeValue(this->temperature, MIN_TEMP, MAX_TEMP);
+    byteArray[5] = encodeValue(this->relativeHumidity, MIN_HUMIDITY, MAX_HUMIDITY);
+    byteArray[6] = encodeValue(this->batteryVoltage, MIN_BATT_V, MAX_BATT_V);
+    byteArray[7] = encodeValue(this->solarPanelVoltage, MIN_SP_V, MAX_SP_V);
 }
 
 Measurement Measurement::fromByteArray(uint8_t (&byteArray)[MEM_SIZE])
 {
 
-    DateHolder date(byteArray[0], byteArray[1], byteArray[2], byteArray[3], byteArray[4]);
+    uint32_t unixTime = (uint32_t)((uint32_t)byteArray[0] << 24 | (uint32_t)byteArray[1] << 16 | (uint32_t)byteArray[2] << 8 | (uint32_t)byteArray[3]);
+
+    DateTime date(unixTime);
 
     Measurement measurement(date,
-                            decodeValue(byteArray[5], MIN_TEMP, MAX_TEMP),
-                            decodeValue(byteArray[6], MIN_HUMIDITY, MAX_HUMIDITY),
-                            decodeValue(byteArray[7], MIN_BATT_V, MAX_BATT_V),
-                            decodeValue(byteArray[8], MIN_SP_V, MAX_SP_V));
+                            decodeValue(byteArray[4], MIN_TEMP, MAX_TEMP),
+                            decodeValue(byteArray[5], MIN_HUMIDITY, MAX_HUMIDITY),
+                            decodeValue(byteArray[6], MIN_BATT_V, MAX_BATT_V),
+                            decodeValue(byteArray[7], MIN_SP_V, MAX_SP_V));
 
     return measurement;
 }
 
-Measurement::Measurement(const DateHolder date,
+Measurement::Measurement(const DateTime date,
                          const float temperature,
                          const float relativeHumidity,
                          const float batteryVoltage,
@@ -64,11 +68,11 @@ Used when dumping data to console.
 */
 const String Measurement::toString()
 {
-    return String(this->date.getYear(), DEC) + "-" +
-           String(this->date.getMonth(), DEC) + "-" +
-           String(this->date.getDay(), DEC) + " " +
-           String(this->date.getHour(), DEC) + ":" +
-           String(this->date.getMinute(), DEC) + " | " +
+    return String(this->date.year(), DEC) + "-" +
+           String(this->date.month(), DEC) + "-" +
+           String(this->date.day(), DEC) + " " +
+           String(this->date.hour(), DEC) + ":" +
+           String(this->date.minute(), DEC) + " | " +
            String(this->temperature, DEC) + " | " +
            String(this->relativeHumidity, DEC) + " | " +
            String(this->batteryVoltage, DEC) + " | " +

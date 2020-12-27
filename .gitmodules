@@ -16,3 +16,6 @@
 [submodule "enviromon/lib/AdafruitSensor"]
 	path = enviromon/lib/AdafruitSensor
 	url = https://github.com/adafruit/Adafruit_Sensor.git
+[submodule "enviromon/lib/RTCLib"]
+	path = enviromon/lib/RTCLib
+	url = git@github.com:adafruit/RTClib.git

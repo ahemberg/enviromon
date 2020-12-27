@@ -13,4 +13,4 @@
 #define MAX_SP_V 12.0
 
 //Size of a saved measurement in bytes
-#define MEM_SIZE 9
+#define MEM_SIZE 8
