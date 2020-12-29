@@ -78,3 +78,15 @@ const String Measurement::toString()
            String(this->batteryVoltage, DEC) + " | " +
            String(this->solarPanelVoltage, DEC);
 }
+
+/*
+Used when dumping data to console.
+*/
+const String Measurement::toCsvString()
+{
+    return String(this->date.unixtime(), DEC) + ";" +
+           String(this->temperature, DEC) + ";" +
+           String(this->relativeHumidity, DEC) + ";" +
+           String(this->batteryVoltage, DEC) + ";" +
+           String(this->solarPanelVoltage, DEC);
+}

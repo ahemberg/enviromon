@@ -107,7 +107,9 @@ void setup()
 
 void loop()
 {
-  //TRIGGERED BY
+  //Debounce delay (TODO consider removing, or identifying a button press!)
+  delay(10);
+  
   if (digitalRead(CLI_ENABLE) == LOW)
   {
     detachInterrupt(digitalPinToInterrupt(ALARM_PIN));

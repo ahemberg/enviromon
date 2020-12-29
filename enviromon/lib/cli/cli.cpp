@@ -4,7 +4,7 @@ Cli::Cli(RTC_DS3231 &r, Storage &s) : rtc(r), storage(s) {}
 
 void Cli::mem()
 {
-  Serial.println("Memory interface: GETADDR | DUMP | DUMPALL | LATEST | ERASE | EXIT ");
+  Serial.println("Memory interface: GETADDR | DISP | DUMP | DUMPALL | DISPALL | LATEST | ERASE | EXIT ");
 
   while (true)
   {
@@ -26,10 +26,28 @@ void Cli::mem()
       Serial.println("Measurements:");
       for (uint16_t addr = 2; addr < storage.getNextAddress(); addr += MEM_SIZE)
       {
+        Serial.println(storage.getMeasurement(addr).toCsvString());
+      }
+    }
+    else if (subCommand.equalsIgnoreCase("DISP"))
+    {
+      //TODO don't print if erased?
+      Serial.println("Measurements:");
+      for (uint16_t addr = 2; addr < storage.getNextAddress(); addr += MEM_SIZE)
+      {
         Serial.println(storage.getMeasurement(addr).toString());
       }
     }
     else if (subCommand.equalsIgnoreCase("DUMPALL"))
+    {
+      //TODO don't print if erased?
+      Serial.println("Measurements:");
+      for (uint16_t addr = 2; addr < (EEPROM.length() - MEM_SIZE); addr += MEM_SIZE)
+      {
+        Serial.println(storage.getMeasurement(addr).toCsvString());
+      }
+    }
+    else if (subCommand.equalsIgnoreCase("DISPALL"))
     {
       //TODO don't print if erased?
       Serial.println("Measurements:");
@@ -71,7 +89,7 @@ void Cli::mem()
     }
     else
     {
-      Serial.println("invalid command! GETADDR | DUMP | DUMPALL | LATEST | ERASE | EXIT");
+      Serial.println("invalid command! GETADDR | DISP | DUMP | DISPALL | DUMPALL | LATEST | ERASE | EXIT");
     }
   }
 }
@@ -162,6 +180,7 @@ void Cli::mainL()
     baseCommand.trim();
     if (baseCommand.equalsIgnoreCase("TIME"))
     {
+      Serial.println(baseCommand);
       time();
     }
     else if (baseCommand.equalsIgnoreCase("MEM"))

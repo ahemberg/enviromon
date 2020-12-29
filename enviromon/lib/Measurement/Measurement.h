@@ -26,4 +26,5 @@ public:
     void getAsByteArray(uint8_t (&byteArray)[MEM_SIZE]);
     static Measurement fromByteArray(uint8_t (&byteArray)[MEM_SIZE]);
     const String toString();
+    const String toCsvString();
 };
