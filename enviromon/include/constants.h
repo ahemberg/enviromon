@@ -21,3 +21,6 @@
 #define BATT_R2 330000
 #define SOLAR_R1 100000
 #define SOLAR_R2 33000
+
+//FILE NAME
+#define DATALOG "datalog"

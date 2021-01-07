@@ -5,21 +5,23 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <RTClib.h>
-#include <cli.h>
+//#include <cli.h>
 #include <Measurement.h>
 #include <Adafruit_Sensor.h>
+#include <Adafruit_BMP085_U.h>
 #include <DHT.h>
-#include <EEPROM.h>
-#include <Storage.h>
 #include <avr/sleep.h>
 #include <avr/power.h>
 
+#include <SPI.h>
+#include <SD.h>
+
 RTC_DS3231 rtc;
-Storage storage;
-Cli cli = Cli(rtc, storage);
+//Cli cli = Cli(rtc);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature tempSensors(&oneWire);
 DHT dht(DHTPIN, DHTTYPE);
+Adafruit_BMP085_Unified bmp = Adafruit_BMP085_Unified(10085);
 
 float measureVoltage(int pin, float r1 = 1, float r2 = 1)
 {
@@ -27,14 +29,22 @@ float measureVoltage(int pin, float r1 = 1, float r2 = 1)
   return (rawVoltage * (r1 + r2)) / r2;
 }
 
+float measurePressure() {
+  sensors_event_t event;
+  bmp.getEvent(&event);
+  return event.pressure;
+}
+
+//TODO need to save all of these more memory efficiently. Convert to uint16_t and save as is. Deconversion could be made offline
+//Store voltages as the 10 bit numbers they are for instance!
 Measurement doMeasurement()
 {
   tempSensors.requestTemperatures();
-  return Measurement(rtc.now(),
+  return Measurement(rtc.now().unixtime(),
                      tempSensors.getTempCByIndex(0),
                      dht.readHumidity() - 10,
-                     measureVoltage(BATT_V_PIN, BATT_R1, BATT_R2),
-                     measureVoltage(SOLAR_V_PIN, SOLAR_R1, SOLAR_R2));
+                     measurePressure(),
+                     measureVoltage(BATT_V_PIN, BATT_R1, BATT_R2));
 }
 
 void alarm_ISR()
@@ -52,7 +62,7 @@ void enterSleep()
   noInterrupts(); // Disable interrupts
   attachInterrupt(digitalPinToInterrupt(ALARM_PIN), alarm_ISR, LOW);
 
-  Serial.println("Going to sleep!"); // Print message to serial monitor
+  //Serial.println(F("sleep")); // Print message to serial monitor
   Serial.flush();                    // Ensure all characters are sent to the serial monitor
 
   power_adc_disable();
@@ -77,11 +87,15 @@ void enterSleep()
   rtc.disableAlarm(1);
   rtc.clearAlarm(1);
 
-  Serial.println("I'm back!"); // Print message to show we're back
+  Serial.println(F("wake")); // Print message to show we're back
 }
 
 void setup()
 {
+
+  //SD Card
+  SD.begin(4);
+
   //Serial and onewire
   Serial.begin(115200);
   Wire.begin();
@@ -89,6 +103,7 @@ void setup()
   //Sensors
   tempSensors.begin();
   dht.begin();
+  bmp.begin();
 
   //Input Pins
   pinMode(CLI_ENABLE, INPUT_PULLUP);
@@ -109,19 +124,24 @@ void loop()
 {
   //Debounce delay (TODO consider removing, or identifying a button press!)
   delay(10);
-  
-  if (digitalRead(CLI_ENABLE) == LOW)
-  {
-    detachInterrupt(digitalPinToInterrupt(ALARM_PIN));
-    cli.mainL();
-    Serial.flush();
-  }
-  else
-  {
-    //Do measurement and save
-    Measurement measurement = doMeasurement();
-    storage.writeMeasurement(measurement);
-    rtc.setAlarm1(DateTime(2020, 6, 25, 0, 0, 0), DS3231_A1_Minute); // Set Alarm at even hour
-    enterSleep();                                                    // Go to sleep
-  }
+
+  //Logic for CLI removed due to no memory left
+  //if (digitalRead(CLI_ENABLE) == LOW)
+  //{
+  //  detachInterrupt(digitalPinToInterrupt(ALARM_PIN));
+  //Serial.println("Recompile with CLI enabled to set time");
+  //cli.mainL();
+  //  Serial.flush();
+  //}
+  //else
+  //{
+  //Do measurement and save
+  Measurement measurement = doMeasurement();
+  File dataFile = SD.open(DATALOG, FILE_WRITE);
+  Serial.println(measurement.toCsvString());
+  dataFile.println(measurement.toCsvString());
+  rtc.setAlarm1(DateTime(2020, 6, 25, 0, 0, 0), DS3231_A1_Second); // Set Alarm at even minute
+  dataFile.close();
+  enterSleep();
+  //}
 }

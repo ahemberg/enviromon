@@ -16,3 +16,12 @@
 [submodule "enviromon/lib/RTCLib"]
 	path = enviromon/lib/RTCLib
 	url = git@github.com:adafruit/RTClib.git
+[submodule "enviromon/lib/SD"]
+	path = enviromon/lib/SD
+	url = git@github.com:arduino-libraries/SD.git
+[submodule "enviromon/enviromon/lib/BMP180"]
+	path = enviromon/enviromon/lib/BMP180
+	url = git@github.com:sparkfun/BMP180_Breakout_Arduino_Library.git
+[submodule "enviromon/lib/Adafruit_BMP085_Unified"]
+	path = enviromon/lib/Adafruit_BMP085_Unified
+	url = git@github.com:adafruit/Adafruit_BMP085_Unified.git
