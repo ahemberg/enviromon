@@ -29,7 +29,8 @@ float measureVoltage(int pin, float r1 = 1, float r2 = 1)
   return (rawVoltage * (r1 + r2)) / r2;
 }
 
-float measurePressure() {
+float measurePressure()
+{
   sensors_event_t event;
   bmp.getEvent(&event);
   return event.pressure;
@@ -63,7 +64,7 @@ void enterSleep()
   attachInterrupt(digitalPinToInterrupt(ALARM_PIN), alarm_ISR, LOW);
 
   //Serial.println(F("sleep")); // Print message to serial monitor
-  Serial.flush();                    // Ensure all characters are sent to the serial monitor
+  Serial.flush(); // Ensure all characters are sent to the serial monitor
 
   power_adc_disable();
   power_spi_disable();
@@ -123,7 +124,7 @@ void setup()
 void loop()
 {
   //Debounce delay (TODO consider removing, or identifying a button press!)
-  delay(10);
+  //delay(10);
 
   //Logic for CLI removed due to no memory left
   //if (digitalRead(CLI_ENABLE) == LOW)
@@ -131,7 +132,7 @@ void loop()
   //  detachInterrupt(digitalPinToInterrupt(ALARM_PIN));
   //Serial.println("Recompile with CLI enabled to set time");
   //cli.mainL();
-  //  Serial.flush();
+  //Serial.flush();
   //}
   //else
   //{
